@@ -8,14 +8,8 @@
         </div>
 
         <div class="topbar-right">
-          <UButton
-            icon="i-heroicons-magnifying-glass"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            aria-label="Keresés"
-            @click="searchOpen = true"
-          />
+          <UButton icon="i-heroicons-magnifying-glass" color="neutral" variant="ghost" size="sm" aria-label="Keresés"
+            @click="searchOpen = true" />
         </div>
       </header>
 
@@ -33,25 +27,11 @@
 
         <!-- Prev / Next navigation -->
         <div v-if="prev || next" class="sheet-nav">
-          <UButton
-            v-if="prev"
-            :to="prev.path"
-            :label="prev.title"
-            icon="i-heroicons-arrow-left"
-            color="neutral"
-            variant="outline"
-            size="sm"
-          />
+          <UButton v-if="prev" :to="prev.path" :label="prev.title" icon="i-heroicons-arrow-left" color="neutral"
+            variant="outline" size="sm" />
           <div class="flex-1" />
-          <UButton
-            v-if="next"
-            :to="next.path"
-            :label="next.title"
-            trailing-icon="i-heroicons-arrow-right"
-            color="neutral"
-            variant="outline"
-            size="sm"
-          />
+          <UButton v-if="next" :to="next.path" :label="next.title" trailing-icon="i-heroicons-arrow-right"
+            color="neutral" variant="outline" size="sm" />
         </div>
       </div>
 
@@ -62,23 +42,11 @@
 
       <!-- Bottom nav -->
       <div v-if="prev || next" class="sheet-bottom-nav">
-        <UButton
-          v-if="prev"
-          :to="prev.path"
-          :label="prev.title"
-          icon="i-heroicons-arrow-left"
-          color="neutral"
-          variant="ghost"
-        />
+        <UButton v-if="prev" :to="prev.path" :label="prev.title" icon="i-heroicons-arrow-left" color="neutral"
+          variant="ghost" />
         <div class="flex-1" />
-        <UButton
-          v-if="next"
-          :to="next.path"
-          :label="next.title"
-          trailing-icon="i-heroicons-arrow-right"
-          color="neutral"
-          variant="ghost"
-        />
+        <UButton v-if="next" :to="next.path" :label="next.title" trailing-icon="i-heroicons-arrow-right" color="neutral"
+          variant="ghost" />
       </div>
     </template>
 
@@ -108,7 +76,7 @@ const { data: navData } = await useAsyncData('nav-slug', () =>
 
 const categoryLabel = computed(() => {
   const parts = route.path.split('/').filter(Boolean)
-  return parts[0] ?? ''
+  return parts[0]?.toUpperCase() ?? ''
 })
 
 const siblings = computed(() => {
@@ -162,16 +130,24 @@ useHead({
   z-index: 5;
 }
 
-.topbar-left { display: flex; align-items: center; gap: 0.5rem; }
-.topbar-right { display: flex; align-items: center; gap: 0.5rem; }
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .sheet-header {
   padding: 2rem 2rem 1.5rem;
   border-bottom: 1px solid var(--ui-border);
   background: linear-gradient(160deg,
-    color-mix(in srgb, var(--ui-primary) 4%, var(--ui-bg)),
-    var(--ui-bg) 70%
-  );
+      color-mix(in srgb, var(--ui-primary) 4%, var(--ui-bg)),
+      var(--ui-bg) 70%);
 }
 
 .sheet-title-row {
@@ -244,6 +220,11 @@ useHead({
   font-weight: 800;
 }
 
-.nf-desc { color: var(--ui-text-muted); }
-.flex-1 { flex: 1; }
+.nf-desc {
+  color: var(--ui-text-muted);
+}
+
+.flex-1 {
+  flex: 1;
+}
 </style>

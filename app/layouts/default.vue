@@ -1,8 +1,22 @@
 <template>
   <UApp>
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar">
+      <UButton icon="i-heroicons-bars-3" color="neutral" variant="ghost" size="sm" aria-label="Menü megnyitása"
+        @click="mobileOpen = true" />
+      <span class="mobile-logo"><span class="mobile-logo-mark">&gt;_</span> CheatSheet</span>
+      <UButton icon="i-heroicons-magnifying-glass" color="neutral" variant="ghost" size="sm"
+        @click="searchOpen = true" />
+    </div>
+
     <div class="app-shell">
+      <!-- Mobile backdrop -->
+      <Transition name="fade">
+        <div v-if="mobileOpen" class="sidebar-backdrop" @click="mobileOpen = false" />
+      </Transition>
+
       <!-- SIDEBAR -->
-      <aside :class="['sidebar', { 'sidebar--collapsed': collapsed }]">
+      <aside :class="['sidebar', { 'sidebar--collapsed': collapsed, 'sidebar--mobile-open': mobileOpen }]">
         <div class="sidebar-header">
           <div v-if="!collapsed" class="logo">
             <span class="logo-mark">&gt;_</span>
@@ -12,15 +26,17 @@
             </div>
           </div>
           <UButton :icon="collapsed ? 'i-heroicons-chevron-right' : 'i-heroicons-chevron-left'" color="neutral"
-            variant="ghost" size="sm" :aria-label="collapsed ? 'Megnyitás' : 'Bezárás'"
+            variant="ghost" size="sm" :aria-label="collapsed ? 'Megnyitás' : 'Bezárás'" class="desktop-only"
             @click="collapsed = !collapsed" />
+          <UButton icon="i-heroicons-x-mark" color="neutral" variant="ghost" size="sm" aria-label="Bezárás"
+            class="mobile-close-btn" @click="mobileOpen = false" />
         </div>
 
         <template v-if="!collapsed">
           <!-- Search -->
           <div class="sidebar-search">
             <UButton icon="i-heroicons-magnifying-glass" label="Keresés..." color="neutral" variant="outline" size="sm"
-              class="w-full justify-start" @click="searchOpen = true" />
+              class="w-full justify-start cursor-pointer" @click="searchOpen = true" />
           </div>
 
           <!-- Navigation -->
@@ -31,13 +47,13 @@
                 <span class="nav-cat-label">{{ cat.title }}</span>
                 <UIcon
                   :name="openCats.includes(cat.path ?? '') ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
-                  class="nav-cat-chevron"
-                />
+                  class="nav-cat-chevron" />
               </button>
               <Transition name="slide">
                 <ul v-show="openCats.includes(cat.path ?? '')" class="nav-items">
                   <li v-for="item in cat.children" :key="item.path">
-                    <NuxtLink :to="item.path" class="nav-item" active-class="nav-item--active">
+                    <NuxtLink :to="item.path" class="nav-item" active-class="nav-item--active"
+                      @click="mobileOpen = false">
                       <UIcon name="i-heroicons-document-text" class="nav-item-icon" />
                       <span>{{ item.title }}</span>
                     </NuxtLink>
@@ -103,6 +119,7 @@
 
 <script setup lang="ts">
 const collapsed = ref(false)
+const mobileOpen = ref(false)
 const openCats = ref<string[]>([])
 const searchOpen = useState('search-open', () => false)
 const searchQuery = ref('')
@@ -285,7 +302,9 @@ watch(() => route.path, (p) => {
   flex-shrink: 0;
 }
 
-.nav-cat-label { flex: 1; }
+.nav-cat-label {
+  flex: 1;
+}
 
 .nav-cat-chevron {
   width: 14px;
@@ -426,17 +445,108 @@ watch(() => route.path, (p) => {
   font-size: 0.875rem;
 }
 
+/* MOBILE TOP BAR */
+.mobile-topbar {
+  display: none;
+}
+
+/* DESKTOP ONLY / MOBILE ONLY helpers */
+.mobile-close-btn {
+  display: none;
+}
+
+/* BACKDROP */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ═══ MOBILE ═══ */
+@media (max-width: 767px) {
+
+  /* Top bar megjelenítése */
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--ui-border);
+    background: var(--ui-bg);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .mobile-logo {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ui-primary);
+  }
+
+  .mobile-logo-mark {
+    opacity: 0.7;
+  }
+
+  /* Sidebar: teljes szélességű drawer mobilon */
+  .app-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: -272px;
+    height: 100vh;
+    z-index: 50;
+    width: 256px !important;
+    transition: left 0.28s ease, box-shadow 0.28s ease;
+    box-shadow: none;
+  }
+
+  .sidebar--mobile-open {
+    left: 0 !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Desktop collapse gomb elrejtése mobilon */
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Close X gomb megjelenítése mobilon */
+  .mobile-close-btn {
+    display: inline-flex;
+  }
+}
+
 /* SLIDE ANIMATION */
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.2s ease;
   overflow: hidden;
 }
+
 .slide-enter-from,
 .slide-leave-to {
   opacity: 0;
   max-height: 0;
 }
+
 .slide-enter-to,
 .slide-leave-from {
   opacity: 1;
