@@ -101,8 +101,11 @@
           <li v-for="item in searchResults" :key="item.path">
             <NuxtLink :to="item.path" class="search-result-link" @click="closeSearch">
               <UIcon name="i-heroicons-document-text" class="search-result-icon" />
-              <span class="search-result-title">{{ item.title }}</span>
-              <UBadge color="neutral" variant="subtle" size="xs">{{ item._catTitle }}</UBadge>
+              <span class="search-result-info">
+                <span class="search-result-title">{{ item.title }}</span>
+                <span v-if="item.snippet" class="search-result-snippet">{{ item.snippet }}</span>
+              </span>
+              <UBadge color="neutral" variant="subtle" size="xs" class="flex-shrink-0">{{ item._catTitle }}</UBadge>
             </NuxtLink>
           </li>
         </ul>
@@ -140,6 +143,10 @@ function toggleCat(path: string) {
   else openCats.value.splice(idx, 1)
 }
 
+const { data: allContentDocs } = await useAsyncData('all-content-search', () =>
+  queryCollection('content').all()
+)
+
 const allDocs = computed(() =>
   navigation.value.flatMap(cat =>
     (cat.children ?? []).map(item => ({
@@ -150,12 +157,50 @@ const allDocs = computed(() =>
   )
 )
 
-const searchResults = computed(() => {
+const searchIndex = computed(() =>
+  (allContentDocs.value ?? []).map((doc: unknown) => {
+    const d = doc as Record<string, unknown>
+    // JSON.stringify captures ALL text in the body AST regardless of structure
+    const bodyJson = JSON.stringify(d.body ?? '').toLowerCase()
+    const descText = String(d.description ?? '').toLowerCase()
+    return {
+      path: String(d.path ?? ''),
+      bodyJson,
+      description: descText,
+    }
+  })
+)
+
+type SearchResult = { path: string; title: string; _catTitle: string; snippet?: string }
+
+const searchResults = computed((): SearchResult[] => {
   const q = searchQuery.value.trim().toLowerCase()
   if (!q) return []
-  return allDocs.value.filter(doc =>
-    doc.title.toLowerCase().includes(q) || doc._catTitle.toLowerCase().includes(q)
-  )
+
+  const titleMatches: SearchResult[] = allDocs.value
+    .filter(doc => doc.title.toLowerCase().includes(q) || doc._catTitle.toLowerCase().includes(q))
+    .map(doc => ({ path: doc.path, title: doc.title, _catTitle: doc._catTitle }))
+
+  const seen = new Set(titleMatches.map(d => d.path))
+  const contentMatches: SearchResult[] = []
+
+  for (const indexed of searchIndex.value) {
+    if (seen.has(indexed.path)) continue
+    if (!indexed.bodyJson.includes(q) && !indexed.description.includes(q)) continue
+
+    const doc = allDocs.value.find(d => d.path === indexed.path)
+    if (!doc) continue
+
+    seen.add(indexed.path)
+    contentMatches.push({
+      path: doc.path,
+      title: doc.title,
+      _catTitle: doc._catTitle,
+      snippet: indexed.description || undefined,
+    })
+  }
+
+  return [...titleMatches, ...contentMatches].slice(0, 15)
 })
 
 function closeSearch() {
@@ -425,10 +470,28 @@ watch(() => route.path, (p) => {
   flex-shrink: 0;
 }
 
-.search-result-title {
+.search-result-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.search-result-title {
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-snippet {
+  font-size: 0.75rem;
+  color: var(--ui-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-empty {
