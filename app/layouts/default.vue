@@ -42,9 +42,9 @@
           <!-- Navigation -->
           <nav class="sidebar-nav">
             <div v-for="cat in navigation" :key="cat.path" class="nav-section">
-              <button class="nav-cat-btn" @click="toggleCat(cat.path ?? '')">
+              <button class="nav-cat-btn " @click="toggleCat(cat.path ?? '')">
                 <AppIcon :name="cat.title" :size="16" variant="original" class="nav-cat-icon" />
-                <span class="nav-cat-label">{{ cat.title }}</span>
+                <span class="nav-cat-label ">{{ cat.title }}</span>
                 <UIcon
                   :name="openCats.includes(cat.path ?? '') ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
                   class="nav-cat-chevron" />
@@ -324,6 +324,7 @@ watch(() => route.path, (p) => {
   width: 100%;
   display: flex;
   align-items: center;
+
   gap: 0.5rem;
   padding: 0.55rem 0.875rem;
   background: transparent;
@@ -349,6 +350,7 @@ watch(() => route.path, (p) => {
 
 .nav-cat-label {
   flex: 1;
+  line-height: 1;
 }
 
 .nav-cat-chevron {
