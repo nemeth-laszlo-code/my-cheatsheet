@@ -1,5 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/'],
+    },
+  },
+
   modules: [
     "@nuxt/eslint",
     "@nuxt/ui",
@@ -27,10 +35,6 @@ export default defineNuxtConfig({
     },
   },
   css: ["~/assets/css/main.css"],
-
-  routeRules: {
-    "/": { prerender: true },
-  },
 
   compatibilityDate: "2025-01-15",
   components: [

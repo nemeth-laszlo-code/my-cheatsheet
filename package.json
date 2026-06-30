@@ -5,7 +5,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "deploy": "nuxi generate && gh-pages -d .output/public",
+    "deploy": "nuxi generate && gh-pages -d .output/public --dotfiles",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
