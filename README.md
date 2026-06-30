@@ -30,6 +30,13 @@ npm run build
 npm run preview
 ```
 
+## Deploy
+- deploy with gh-pages package
+
+```bash
+npm run deploy
+```
+
 ## Documentation
 
 - Documentation available in the DOCUMENTATION.md
